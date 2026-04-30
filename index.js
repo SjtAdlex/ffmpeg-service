@@ -20,7 +20,7 @@ app.post('/split', upload.single('file'), (req, res) => {
   const input = req.file.path;
 
   exec(
-    `ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`,
+  ` ffmpeg -y -i ${input} -f segment -segment_time 60 -acodec libmp3lame /tmp/out_%03d.mp3`,
     (err) => {
       if (err) {
         console.error(err);
