@@ -41,4 +41,7 @@ app.post('/split', upload.single('file'), (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`running on ${PORT}`));
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`running on ${PORT}`);
+});
