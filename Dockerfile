@@ -1,11 +1,13 @@
-FROM node:18-bullseye
-
-RUN apt-get update && apt-get install -y ffmpeg
+FROM node:18-slim
 
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm install
+
 COPY . .
 
-RUN npm install
+# installer ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
 
 CMD ["node", "index.js"]
