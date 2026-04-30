@@ -21,7 +21,7 @@ app.post('/split', upload.single('file'), (req, res) => {
     `ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`,
     (err) => {
       if (err) {
-        console.error('FFmpeg error:', err);
+        console.error(err);
         return res.status(500).send('ffmpeg failed');
       }
 
