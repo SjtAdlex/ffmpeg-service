@@ -1,7 +1,7 @@
-const express = require('express');
-const multer = require('multer');
-const { exec } = require('child_process');
-const fs = require('fs');
+import express from 'express';
+import multer from 'multer';
+import { exec } from 'child_process';
+import fs from 'fs';
 
 const app = express();
 const upload = multer({ dest: '/tmp/' });
@@ -21,7 +21,7 @@ app.post('/split', upload.single('file'), (req, res) => {
     `ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`,
     (err) => {
       if (err) {
-        console.error(err);
+        console.error('FFmpeg error:', err);
         return res.status(500).send('ffmpeg failed');
       }
 
@@ -41,4 +41,4 @@ app.post('/split', upload.single('file'), (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('running'));
+app.listen(PORT, () => console.log(`running on ${PORT}`));
