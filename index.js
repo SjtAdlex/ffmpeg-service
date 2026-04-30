@@ -7,18 +7,45 @@ const app = express();
 const upload = multer({ dest: '/tmp/' });
 
 app.post('/split', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+
   const input = req.file.path;
 
-  exec(`ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`, () => {
-    const files = fs.readdirSync('/tmp').filter(f => f.startsWith('out_'));
+  exec(
+    `ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`,
+    (err) => {
+      if (err) {
+        console.error('FFmpeg error:', err);
+        return res.status(500).send('ffmpeg failed');
+      }
 
-    const result = files.map(f => ({
-      filename: f,
-      path: `/tmp/${f}`
-    }));
+      try {
+        const files = fs
+          .readdirSync('/tmp')
+          .filter(f => f.startsWith('out_'));
 
-    res.json(result);
-  });
+        const result = files.map(f => {
+          const filePath = `/tmp/${f}`;
+          const fileData = fs.readFileSync(filePath).toString('base64');
+
+          return {
+            filename: f,
+            data: fileData
+          };
+        });
+
+        res.json(result);
+      } catch (e) {
+        console.error('File read error:', e);
+        res.status(500).send('file processing failed');
+      }
+    }
+  );
 });
 
-app.listen(3000, () => console.log('running'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`FFmpeg service running on port ${PORT}`);
+});
