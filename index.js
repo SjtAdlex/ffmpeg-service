@@ -3,6 +3,8 @@ import multer from 'multer';
 import { exec } from 'child_process';
 import fs from 'fs';
 
+console.log("PORT:", process.env.PORT);
+
 const app = express();
 const upload = multer({ dest: '/tmp/' });
 
@@ -40,8 +42,13 @@ app.post('/split', upload.single('file'), (req, res) => {
   );
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
-app.listen(process.env.PORT, '0.0.0.0', () => {
-  console.log(`running on ${process.env.PORT}`);
+if (!PORT) {
+  console.error("NO PORT FOUND");
+  process.exit(1);
+}
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`running on ${PORT}`);
 });
