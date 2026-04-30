@@ -1,10 +1,14 @@
-import express from 'express';
-import multer from 'multer';
-import { exec } from 'child_process';
-import fs from 'fs';
+const express = require('express');
+const multer = require('multer');
+const { exec } = require('child_process');
+const fs = require('fs');
 
 const app = express();
 const upload = multer({ dest: '/tmp/' });
+
+app.get('/', (req, res) => {
+  res.send('alive');
+});
 
 app.post('/split', upload.single('file'), (req, res) => {
   if (!req.file) {
@@ -17,35 +21,24 @@ app.post('/split', upload.single('file'), (req, res) => {
     `ffmpeg -i ${input} -f segment -segment_time 60 -c copy /tmp/out_%03d.mp3`,
     (err) => {
       if (err) {
-        console.error('FFmpeg error:', err);
+        console.error(err);
         return res.status(500).send('ffmpeg failed');
       }
 
-      try {
-        const files = fs
-          .readdirSync('/tmp')
-          .filter(f => f.startsWith('out_'));
+      const files = fs.readdirSync('/tmp').filter(f => f.startsWith('out_'));
 
-        const result = files.map(f => {
-          const filePath = `/tmp/${f}`;
-          const fileData = fs.readFileSync(filePath).toString('base64');
+      const result = files.map(f => {
+        const fileData = fs.readFileSync(`/tmp/${f}`).toString('base64');
+        return {
+          filename: f,
+          data: fileData
+        };
+      });
 
-          return {
-            filename: f,
-            data: fileData
-          };
-        });
-
-        res.json(result);
-      } catch (e) {
-        console.error('File read error:', e);
-        res.status(500).send('file processing failed');
-      }
+      res.json(result);
     }
   );
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`FFmpeg service running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log('running'));
