@@ -7,7 +7,8 @@ RUN npm install
 
 COPY . .
 
-# installer ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg
+
+EXPOSE 8080
 
 CMD ["node", "index.js"]
